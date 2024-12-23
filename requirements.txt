@@ -1,0 +1,12 @@
+SpeechRecognition
+pyaudio
+pyttsx3
+requests
+pydub
+librosa
+streamlit
+transformers
+bitsandbytes
+gradio
+gTTS
+accelerate
