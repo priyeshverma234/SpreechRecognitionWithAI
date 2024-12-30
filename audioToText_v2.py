@@ -2,6 +2,9 @@ import speech_recognition as sr
 from pydub import AudioSegment
 import os
 from sentence_transformers import SentenceTransformer, util
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class AudioToText:
     def __init__(self, audio_file):

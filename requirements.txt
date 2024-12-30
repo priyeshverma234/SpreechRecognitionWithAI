@@ -13,3 +13,6 @@ accelerate
 sentence-transformers
 sentencepiece
 nltk
+python-dotenv
+langchain_community
+python-ffmpeg
