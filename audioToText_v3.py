@@ -22,7 +22,7 @@ class AudioToText:
             model_id="gpt2",
             task="text-generation",
             pipeline_kwargs={"max_new_tokens": 150},
-            device=0
+            device=-1
         )
 
         # Initialize PromptTemplate
@@ -43,8 +43,13 @@ class AudioToText:
         audio.export(wav_file, format="wav")
         return wav_file
 
-    def transcribe_audio(self, wav_file):
-        with sr.AudioFile(wav_file) as source:
+    def split_audio(self, wav_file, chunk_length_ms=60000):  # 1 minutes
+        audio = AudioSegment.from_wav(wav_file)
+        chunks = [audio[i:i + chunk_length_ms] for i in range(0, len(audio), chunk_length_ms)]
+        return chunks
+
+    def transcribe_audio_chunk(self, audio_chunk):
+        with sr.AudioFile(audio_chunk) as source:
             audio_data = self.recognizer.record(source)
         try:
             text = self.recognizer.recognize_google(audio_data)
@@ -53,6 +58,17 @@ class AudioToText:
             return "Sorry, could not understand audio."
         except sr.RequestError as e:
             return f"Error: Could not request results from Google Speech Recognition service; {e}"
+
+    def transcribe_audio(self, wav_file):
+        chunks = self.split_audio(wav_file)
+        full_text = ""
+        for i, chunk in enumerate(chunks):
+            chunk_file = f"chunk{i}.wav"
+            chunk.export(chunk_file, format="wav")
+            text = self.transcribe_audio_chunk(chunk_file)
+            full_text += text + " "
+            os.remove(chunk_file)  # Clean up chunk file
+        return full_text
 
     def write_text_to_file(self, text, output_file):
         with open(output_file, 'w') as file:
@@ -75,8 +91,8 @@ class AudioToText:
 
 # Example usage
 if __name__ == "__main__":
-    audio_file = "harvard.wav"  # Replace with your audio file path
-    output_file = "transcription.txt"
+    audio_file = "SampleAudioFiles/Committee of the Whole 2024-12-10.mp3"  # Replace with your audio file path
+    output_file = "SampleOutput/transcription.txt"
     audio_to_text = AudioToText(audio_file)
     transcribed_text = audio_to_text.process_audio(output_file)
     print(f"Transcription written to {output_file}")

@@ -68,8 +68,8 @@ class AudioToText:
 
 # Example usage
 if __name__ == "__main__":
-    audio_file = "harvard.wav"  # Replace with your audio file path
-    output_file = "transcription.txt"
+    audio_file = "SampleAudioFiles/harvard.wav"  # Replace with your audio file path
+    output_file = "SampleOutput/transcription.txt"
     audio_to_text = AudioToText(audio_file)
     transcribed_text = audio_to_text.process_audio(output_file)
     print(f"Transcription written to {output_file}")
