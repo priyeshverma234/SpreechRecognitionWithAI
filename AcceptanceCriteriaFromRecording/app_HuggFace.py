@@ -8,6 +8,7 @@ import nltk
 import re
 import numpy as np
 from pydub import AudioSegment
+from nltk import sent_tokenize
 
 def setup_environment():
     try:
@@ -81,10 +82,12 @@ def transcribe_with_google(audio_path):
 
 # Function to generate text description
 def describe_text(input_text):
-    prompt_instructions = f"Describe the context of the following text:\n{input_text}\n"
+    prompt_instructions = f"Summarize the key points discussed in the following meeting transcript:\n{input_text}\nProvide a brief summary of the main topics and decisions made."    
     prompt = prompt_instructions
     outputs = pipe(prompt, max_new_tokens=200)
     print("Outputs:", outputs)
+    for sent in sent_tokenize(outputs[0]["generated_text"]):
+        print(sent)
 
     if outputs is not None and len(outputs[0]["generated_text"]) > 0:
         reply = outputs[0]["generated_text"]
