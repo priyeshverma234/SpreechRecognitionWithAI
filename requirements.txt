@@ -16,3 +16,4 @@ nltk
 python-dotenv
 langchain_community
 python-ffmpeg
+google-generativeai

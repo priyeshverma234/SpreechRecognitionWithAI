@@ -9,6 +9,9 @@ import re
 import numpy as np
 from pydub import AudioSegment
 from nltk import sent_tokenize
+from sys import path
+path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from InvokeModel.Gemini import GeminiModel  # Import GeminiModel
 
 def setup_environment():
     try:
@@ -16,17 +19,25 @@ def setup_environment():
         nltk.download('punkt')
 
         # Set up quantization configuration
-        quantization_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_compute_dtype=torch.float16
-        )
+        # quantization_config = BitsAndBytesConfig(
+        #     load_in_4bit=True,
+        #     bnb_4bit_compute_dtype=torch.float16
+        # )
+        # # Set model ID and load the model
+        # global pipe
+        # model_id = "google/byt5-small"
+        # # model_id = "google/flan-t5-xxl"
+        # pipe = pipeline("text2text-generation",
+        #                 model=model_id)
+        #                 # model_kwargs={"quantization_config": quantization_config})
+
+        # # Set CUDA path to environment variables
+        # cuda_path = r"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.6\bin"
+        # os.environ["PATH"] += os.pathsep + cuda_path
 
         # Set model ID and load the model
-        global pipe
-        model_id = "google/byt5-small"
-        pipe = pipeline("text2text-generation",
-                        model=model_id,
-                        model_kwargs={"quantization_config": quantization_config})
+        global gemini_model
+        gemini_model = GeminiModel()  # Initialize GeminiModel
 
         # Set CUDA path to environment variables
         cuda_path = r"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.6\bin"
@@ -84,13 +95,15 @@ def transcribe_with_google(audio_path):
 def describe_text(input_text):
     prompt_instructions = f"Summarize the key points discussed in the following meeting transcript:\n{input_text}\nProvide a brief summary of the main topics and decisions made."    
     prompt = prompt_instructions
-    outputs = pipe(prompt, max_new_tokens=200)
+    # outputs = pipe(prompt, max_new_tokens=200)
+    outputs = gemini_model.trigger_model(prompt)  # Use GeminiModel to generate text
+    return outputs
     print("Outputs:", outputs)
-    for sent in sent_tokenize(outputs[0]["generated_text"]):
+    for sent in sent_tokenize(outputs):
         print(sent)
 
-    if outputs is not None and len(outputs[0]["generated_text"]) > 0:
-        reply = outputs[0]["generated_text"]
+    if outputs is not None and len(outputs) > 0:
+        reply = outputs
     else:
         reply = "No response generated."
     return reply
